@@ -5,7 +5,7 @@
 
 (defn read-file
   [filename]
-  (slurp (io/resource filename)))
+  (str/trim (slurp (io/resource filename))))
 
 (defn to-blocks
   [input]
