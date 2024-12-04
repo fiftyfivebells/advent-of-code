@@ -8,9 +8,6 @@
        u/to-lines
        (mapv u/strings->longs)))
 
-(def test (transform-input "day02test.txt"))
-
-
 (defn all-increasing
   [lst]
   (apply < lst))
@@ -38,6 +35,27 @@
   (and (report-sequence-safe? report)
        (valid-differences? report)))
 
+;; this function takes a report and steps through it one by one. At each step, it rebuilds
+;; the report with the number at the current index missing and checks to see if it's safe.
+;; if yes, it returns true, and if no it continues the iteration. If it makes it through the
+;; whole report without a safe subreport, then I know that this report has more than one
+;; bad level and can't be made safe.
+(defn only-one-bad-level?
+  [report]
+  (loop [i (dec (count report))]
+    (let [left (subvec report 0 i)
+          right (subvec report (inc i))
+          new-report (into left right)]
+      (cond
+        (report-safe? new-report) true
+        (zero? i) false
+        :else (recur (dec i))))))
+
+(defn report-safe-2?
+  [report]
+  (or (report-safe? report)
+      (only-one-bad-level? report)))
+
 (defn day02-part-1
   [input]
   (->> input
@@ -45,8 +63,13 @@
        (filter report-safe?)
        count))
 
-(def unsafe
-  (->> test
-       (filter (complement report-safe?))))
+(defn day02-part-2
+  [input]
+  (->> input
+       transform-input
+       (map vec)
+       (filter report-safe-2?)
+       count))
 
 (day02-part-1 "day02.txt")
+(day02-part-2 "day02.txt")
